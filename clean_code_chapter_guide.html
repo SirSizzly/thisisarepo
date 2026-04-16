@@ -1,0 +1,425 @@
+
+<style>
+:root { --accent: #185FA5; --accent-light: #E6F1FB; --accent-mid: #378ADD; --border: 0.5px solid var(--color-border-tertiary); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.header { padding: 1.5rem 0 1rem; border-bottom: var(--border); margin-bottom: 1rem; }
+.header h1 { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.header p { font-size: 14px; color: var(--color-text-secondary); margin-top: 4px; }
+.nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.5rem; }
+.nav button { font-size: 12px; padding: 4px 10px; border: var(--border); border-radius: 20px; background: var(--color-background-primary); color: var(--color-text-secondary); cursor: pointer; transition: all 0.15s; }
+.nav button:hover, .nav button.active { background: var(--accent-light); color: #0C447C; border-color: var(--accent-mid); }
+.chapter { display: none; }
+.chapter.active { display: block; }
+.ch-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 1rem; }
+.ch-num { font-size: 13px; font-weight: 500; color: var(--accent); background: var(--accent-light); padding: 3px 10px; border-radius: 20px; }
+.ch-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+.summary-box { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.25rem; font-size: 15px; color: var(--color-text-primary); line-height: 1.7; }
+.section-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-tertiary); margin-bottom: 8px; }
+.points { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
+.points li { display: flex; gap: 10px; font-size: 14px; line-height: 1.6; color: var(--color-text-primary); }
+.points li::before { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-mid); margin-top: 7px; flex-shrink: 0; }
+.rules { display: grid; gap: 8px; margin-bottom: 1.25rem; }
+.rule-card { background: var(--color-background-primary); border: var(--border); border-radius: var(--border-radius-md); padding: 10px 14px; }
+.rule-card strong { display: block; font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 3px; }
+.rule-card span { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
+.code-block { background: var(--color-background-secondary); border-left: 2px solid var(--accent-mid); border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 10px 14px; font-family: var(--font-mono); font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 1rem; white-space: pre-wrap; }
+.quote { border-left: 2px solid var(--accent-mid); padding: 8px 14px; margin-bottom: 1rem; font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; font-style: italic; }
+.tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-right: 4px; margin-bottom: 4px; }
+.tag-blue { background: var(--accent-light); color: #0C447C; }
+.tag-green { background: #EAF3DE; color: #27500A; }
+.tag-amber { background: #FAEEDA; color: #633806; }
+.tag-red { background: #FCEBEB; color: #791F1F; }
+.nav-footer { display: flex; justify-content: space-between; margin-top: 1.5rem; padding-top: 1rem; border-top: var(--border); }
+.nav-footer button { font-size: 13px; padding: 6px 14px; border: var(--border); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-secondary); cursor: pointer; }
+.nav-footer button:hover { background: var(--color-background-secondary); }
+</style>
+
+<h2 class="sr-only">Clean Code by Robert C. Martin — interactive chapter-by-chapter summary guide</h2>
+
+<div class="header">
+  <h1>Clean Code — Chapter Guide</h1>
+  <p>Robert C. Martin &nbsp;·&nbsp; 17 chapters &nbsp;·&nbsp; Click any chapter to explore</p>
+</div>
+
+<div class="nav" id="nav"></div>
+<div id="chapters"></div>
+
+<script>
+const chapters = [
+  {
+    num: 1, title: "Clean Code",
+    summary: "The foundation of the book. Martin argues that bad code is a liability that compounds over time — what he calls the 'wading' effect where programmers are slowed by the mess they've made. He surveys opinions from industry luminaries (Bjarne Stroustrup, Grady Booch, Ward Cunningham, Michael Feathers, Ron Jeffries, Dave Thomas) on what clean code means, converging on a shared set of values: readability, single-mindedness, expressiveness, and minimal dependencies.",
+    points: [
+      "Bad code causes the 'wading' effect — developers slow to a crawl navigating messy codebases, eventually requiring costly rewrites.",
+      "The 'broken windows' principle applies to code: one bad area invites more. The rot spreads.",
+      "Bjarne Stroustrup: clean code does one thing well, with efficient resource use and zero error handling leakage.",
+      "Grady Booch: clean code reads like well-written prose — it is never obfuscated.",
+      "Ward Cunningham: you know it's clean code when every routine is what you expected. The language itself looks like it was made for the problem.",
+      "The Boy Scout Rule: 'Leave the campground cleaner than you found it.' Always improve the code slightly when you touch it.",
+      "Reading vs. writing ratio in code is 10:1 — making code easy to read makes it easier to write."
+    ],
+    rules: [
+      { title: "The Boy Scout Rule", desc: "Always leave code a little cleaner than you found it. Small improvements compound over time." },
+      { title: "Clean code does one thing", desc: "Functions and classes should have a single-minded attitude. No surprises, no side effects." },
+      { title: "Minimize dependencies", desc: "Clean code reduces coupling to make change easier and errors more obvious." }
+    ]
+  },
+  {
+    num: 2, title: "Meaningful Names",
+    summary: "Names are everywhere in code — variables, functions, classes, packages, files. Because naming is so pervasive, choosing good names has an outsized impact on readability. This chapter provides a comprehensive set of rules for naming, backed by clear before/after examples showing how a name change can transform confusing code into self-documenting code.",
+    points: [
+      "Names should reveal intent: why it exists, what it does, how it's used. If a name needs a comment, the name is wrong.",
+      "Avoid disinformation: don't use names with misleading connotations (e.g., 'accountList' if it's not a List type).",
+      "Make meaningful distinctions: 'a1, a2' tells you nothing. 'source, destination' tells you everything.",
+      "Use pronounceable names: 'genymdhms' vs 'generationTimestamp' — you need to be able to talk about your code.",
+      "Use searchable names: single-letter variables or magic numbers like '7' are impossible to grep for. Prefer named constants.",
+      "Avoid encodings like Hungarian Notation (m_name, strAddress) — modern IDEs make this redundant and it adds noise.",
+      "Class names should be nouns (Customer, WikiPage, Account). Method names should be verbs (postPayment, deletePage, save).",
+      "Pick one word per concept and stick to it: don't mix fetch/retrieve/get across the codebase.",
+      "Use domain names: CS terms (JobQueue, Visitor) for programmer readers; business domain terms for domain concepts."
+    ],
+    rules: [
+      { title: "Intention-revealing names", desc: "int d; // elapsed time in days → int elapsedTimeInDays. The name itself is the documentation." },
+      { title: "Avoid disinformation", desc: "Don't use 'hp', 'aix', 'sco' as variable names — they are Unix platform names and mislead." },
+      { title: "One word per concept", desc: "Don't use fetch, retrieve, and get interchangeably. Pick one and use it everywhere." },
+      { title: "No encodings", desc: "Abandon Hungarian Notation and member prefixes (m_). Modern tooling makes them noise." }
+    ]
+  },
+  {
+    num: 3, title: "Functions",
+    summary: "Functions are the primary unit of organization in any program. This chapter, one of the most influential in the book, argues for extremely small, single-purpose functions with descriptive names. Martin walks through a real refactoring of a 60-line function into a clean hierarchy of small functions, demonstrating how the result is dramatically easier to read and understand.",
+    points: [
+      "Functions should be small — ideally 5-10 lines. If they're larger, they're almost certainly doing more than one thing.",
+      "Blocks within if/else/while should be one line long — a function call with a descriptive name. Indentation nesting should be 1-2 levels max.",
+      "The Single Responsibility Principle (SRP) for functions: a function should do one thing, do it well, do it only.",
+      "One level of abstraction per function: don't mix high-level policy (getHTML()) with low-level details (String.append('\\n')) in the same function.",
+      "The Stepdown Rule: code should read like a newspaper, high level to low level, each function followed by the functions it calls.",
+      "Prefer zero arguments (niladic) > one (monadic) > two (dyadic). Avoid three (triadic). Never more than three.",
+      "Flag arguments (passing a boolean) are ugly — they announce the function does two things. Split it into two functions.",
+      "Functions should either do something (command) or answer something (query), never both — Command Query Separation.",
+      "Prefer exceptions over returning error codes. Error codes cause callers to handle errors immediately, cluttering logic.",
+      "Don't repeat yourself (DRY) — duplication is the root of all evil in software.",
+      "The master programmer thinks of systems as stories to be told, using the vocabulary of functions to construct a rich, expressive language."
+    ],
+    rules: [
+      { title: "Do one thing", desc: "If a function does only one thing, you cannot meaningfully extract a section from it into a separate named function." },
+      { title: "Stepdown rule", desc: "Read like a newspaper: high-level abstractions at top, low-level details at bottom." },
+      { title: "No flag arguments", desc: "render(true) is terrible. renderForSuite() and renderForSingleTest() are readable." },
+      { title: "Command query separation", desc: "set(key, value) should not return bool. Split into hasAttribute(key) and setAttribute(key, value)." },
+      { title: "Prefer exceptions", desc: "Returning error codes forces callers to handle errors inline. Exceptions separate the logic from the error path." }
+    ]
+  },
+  {
+    num: 4, title: "Comments",
+    summary: "Martin takes a provocative stance: comments are failures. They exist because we couldn't express ourselves clearly in code. The best comment is a well-named function. However, some comments are truly necessary — legal notices, intent explanations for unintuitive decisions, warnings of consequences. The chapter catalogs both good and bad comment types, with the bad list being much longer.",
+    points: [
+      "The proper use of comments is to compensate for failure to express yourself in code. Every comment is a failure to communicate through code itself.",
+      "Comments lie. Code evolves; comments don't always follow. Old comments become misleading, making them worse than no comment.",
+      "Good comments: legal comments (copyright), informative explanations of intent/regex, warnings of consequences, TODO notes, amplification of non-obvious importance.",
+      "Bad comments: mumbling to yourself, redundant comments that just repeat the code (i++; // increment i), misleading comments, mandated Javadocs on every function.",
+      "Noise comments — redundant Javadocs with empty @param/@return — clutter the source and train readers to ignore all comments.",
+      "Never leave commented-out code. No one knows why it's there, everyone is afraid to delete it. Use version control instead.",
+      "Don't use a comment when you can use a function or a variable. Extract the intent into a named function.",
+      "Journal comments (change logs in source files) are clutter — that's what source control is for.",
+      "Position markers like '// Actions //////////////////' are almost always noise."
+    ],
+    rules: [
+      { title: "Explain intent, not mechanics", desc: "// Compensate for border width is good. // Increment i on i++; is pure noise." },
+      { title: "Delete commented-out code", desc: "Version control remembers it. Commented-out code rots and misleads." },
+      { title: "No journal comments", desc: "Don't maintain a change log in the source file. That's what git log is for." },
+      { title: "Prefer code over comments", desc: "Before writing a comment, ask: can I rename a variable or extract a function to make this self-evident?" }
+    ]
+  },
+  {
+    num: 5, title: "Formatting",
+    summary: "Formatting is about communication. The readability of your code affects every change made to it in the future — even after the original logic is long gone. Martin covers both vertical formatting (file size, blank lines, ordering of functions) and horizontal formatting (line length, indentation, alignment), drawing on real measurements across open-source Java projects.",
+    points: [
+      "Formatting is communication. It is the professional developer's first order of business — before 'making it work'.",
+      "Source files should be small. Martin's data shows FitNesse's files average 65 lines, with most under 200. Tomcat has files thousands of lines long.",
+      "Vertical openness: blank lines separate concepts (package declaration, imports, each function). They are visual separators.",
+      "Vertical density: lines that are closely related should appear close together without blank lines between them.",
+      "Variable declarations should be at the top of functions (for short ones) or just before first use.",
+      "Instance variables should be declared at the top of the class, in a well-known location.",
+      "Dependent functions: if one function calls another, they should be vertically close, with the caller above the callee.",
+      "Line length: 80-120 characters. Beyond 120 is probably careless. Avoid having to scroll right.",
+      "Horizontal alignment of variable declarations (lining up '=') draws the eye to the wrong thing.",
+      "Team rules trump personal preference. An agreed-upon standard consistently applied is better than individual excellence inconsistently applied."
+    ],
+    rules: [
+      { title: "Newspaper metaphor", desc: "The most important stuff goes at the top. Details flow down. A file name should be simple and explanatory like a headline." },
+      { title: "Vertical distance", desc: "Concepts that are closely related should be vertically close. Don't force readers to scroll to understand one thing." },
+      { title: "Caller above callee", desc: "If function A calls function B, A should appear above B in the file. Code flows top to bottom." },
+      { title: "Team agreement", desc: "Agree on a standard with your team and stick to it. Consistency across the codebase matters more than any individual preference." }
+    ]
+  },
+  {
+    num: 6, title: "Objects and Data Structures",
+    summary: "A subtle but important chapter about the fundamental distinction between objects (which hide data and expose behavior) and data structures (which expose data and have no meaningful behavior). Understanding this distinction prevents common design mistakes like reflexively adding getters and setters to everything.",
+    points: [
+      "Objects hide data behind abstractions and expose functions. Data structures expose data and have no meaningful functions. These are virtual opposites.",
+      "Objects allow you to add new types without changing existing functions (via polymorphism). Data structures allow you to add new functions without changing existing types.",
+      "Procedural code (using data structures) is appropriate when you expect to add new operations. OO code is appropriate when you expect to add new types.",
+      "The Law of Demeter: a method of class C should only call methods of C itself, objects created by C, objects passed as arguments, or objects held in instance variables. Don't call methods on objects returned by other methods (train wrecks).",
+      "Train wrecks: a.getB().getC().doSomething() — bad. Violates Law of Demeter and hides structure.",
+      "Hybrids (half-object, half-data-structure) have the worst of both worlds: hard to add both new functions and new types.",
+      "Data Transfer Objects (DTOs) are pure data structures: public variables, no functions. Useful for communicating with databases or parsing messages.",
+      "Active Record (DTO with find/save) should not have business rules added to it — that creates a hybrid. Business logic goes in separate objects."
+    ],
+    rules: [
+      { title: "Law of Demeter", desc: "Talk only to your immediate friends. ctx.getOptions().getScratchDir().getAbsolutePath() is a train wreck." },
+      { title: "Don't add getters/setters reflexively", desc: "Adding them everywhere just exposes implementation. Think about what behavior the object should expose." },
+      { title: "Choose the right abstraction", desc: "Procedural for new operations, OO for new types. Know which you're writing and commit to it." }
+    ]
+  },
+  {
+    num: 7, title: "Error Handling",
+    summary: "Error handling is important but shouldn't obscure the main logic. Martin argues strongly for exceptions over return codes, and for structuring error handling so that it's separated from the happy path. He also warns against checked exceptions overuse and null returns.",
+    points: [
+      "Use exceptions rather than return codes. Return codes clutter callers, which must check for errors immediately after every call.",
+      "Write your try-catch-finally first. Define the scope of what can go wrong before writing the happy path.",
+      "Unchecked exceptions are preferred. Checked exceptions violate the Open/Closed Principle — adding a new throw forces changes all the way up the call chain.",
+      "Provide context with exceptions. Exception messages should state the operation that failed and the type of failure.",
+      "Define exception classes in terms of the caller's needs. Wrap third-party APIs into your own exception hierarchy.",
+      "The Special Case pattern: create a class or configure an object to handle special behavior, so the caller doesn't have to deal with exceptional behavior.",
+      "Don't return null. Returning null passes the burden to callers who must remember to check for it. Return empty collections, use the Special Case pattern.",
+      "Don't pass null. Passing null is even worse than returning it — it requires defensive checking throughout."
+    ],
+    rules: [
+      { title: "No null returns", desc: "Return empty list, empty string, or a Special Case object. Never null. One missed null check crashes the program." },
+      { title: "No null arguments", desc: "Passing null is an invitation to NullPointerExceptions. Treat it as an error by default." },
+      { title: "Separate error path from happy path", desc: "try { doWork(); } catch (e) { logError(e); } — the logic is clean, the error is isolated." }
+    ]
+  },
+  {
+    num: 8, title: "Boundaries",
+    summary: "Software systems are assembled from third-party code, open-source libraries, and APIs from other teams. Managing the boundary between your code and outside code cleanly prevents the outside code's design decisions from leaking into your own system.",
+    points: [
+      "Don't pass third-party containers (like Map) around your system. Wrap them in your own class that exposes only what you need.",
+      "Explore third-party code with learning tests: write tests to learn the API. These tests document your understanding and detect when the third-party library changes behavior in future versions.",
+      "For code that doesn't exist yet, define the interface you wish existed. Write an Adapter that translates between your ideal interface and the real one when it's available.",
+      "Keep boundary interfaces local and hidden. Don't expose third-party types in your public API.",
+      "Adapter pattern is key at boundaries: define the interface you need, write an adapter to the real API, and test the adapter."
+    ],
+    rules: [
+      { title: "Wrap third-party APIs", desc: "Map<String, Sensor> inside a Sensors class. Expose only what you need. Insulate your code from API changes." },
+      { title: "Learning tests", desc: "Write tests to learn a library. Free, precise experiments that document your understanding of the API." },
+      { title: "Code to an interface you wish existed", desc: "Define the perfect API for your needs, write the adapter when the real code arrives." }
+    ]
+  },
+  {
+    num: 9, title: "Unit Tests",
+    summary: "The Three Laws of Test-Driven Development and what makes a good test. Martin argues that test code is as important as production code — it must be maintained, refactored, and kept clean. Dirty tests are worse than no tests because they rot, get abandoned, and leave the code unprotected.",
+    points: [
+      "The Three Laws of TDD: (1) Write a failing test before production code. (2) Write only enough of a test to fail (not compiling is failing). (3) Write only enough production code to pass the failing test.",
+      "Test code is as important as production code. It requires the same thought, design, and care. Dirty test code is a liability.",
+      "Tests enable fearless refactoring. Without tests, every change is a potential bug. With comprehensive tests, you can refactor confidently.",
+      "One concept per test. A single test should verify one behavior. Multiple assertions about unrelated behavior make failures ambiguous.",
+      "F.I.R.S.T. principles: Fast (run quickly so you run them often), Independent (don't depend on each other), Repeatable (in any environment), Self-validating (boolean pass/fail), Timely (written just before production code).",
+      "Build-Operate-Check (Given-When-Then) pattern: set up the data, take the action, check the result. Makes tests readable.",
+      "Tests should be as expressive as the domain. Domain-specific testing language — helper functions, custom assertions — makes tests read like specifications."
+    ],
+    rules: [
+      { title: "F.I.R.S.T.", desc: "Fast, Independent, Repeatable, Self-validating, Timely. Any test violating these principles is a problem." },
+      { title: "One assert per test", desc: "Or at minimum, one concept per test. The test name should tell you exactly what it verifies." },
+      { title: "Tests enable change", desc: "The thing that makes production code flexible is the test suite. Without it, every change is a potential regression." }
+    ]
+  },
+  {
+    num: 10, title: "Classes",
+    summary: "Applying the same principles from functions to classes: small, single-purpose, cohesive. Martin introduces the Single Responsibility Principle (SRP), cohesion, and the Open/Closed Principle. A class with many instance variables has low cohesion — when methods use all of them you have a cohesive class; when only a few methods use a few variables, you may have multiple hidden classes.",
+    points: [
+      "Classes should be small. Measured in responsibilities, not lines. If you can't describe a class in 25 words without 'and', 'or', 'but', or 'if', it has too many responsibilities.",
+      "Single Responsibility Principle (SRP): a class should have one reason to change. Every class should be responsible for exactly one part of the functionality.",
+      "Cohesion: a class is maximally cohesive when every method uses every instance variable. When cohesion drops, split the class.",
+      "Classes should be open for extension but closed for modification (Open/Closed Principle). Add behavior by writing new code, not by changing existing code.",
+      "Dependency Inversion Principle (DIP): depend on abstractions, not concretions. Your class should depend on an interface, not a specific implementation.",
+      "The God class anti-pattern: a class that does everything and knows everything. Usually a sign that the developer was thinking procedurally in an OO language.",
+      "Isolating from change: interfaces and abstract classes define the seams at which the system can change without ripple effects."
+    ],
+    rules: [
+      { title: "SRP", desc: "One reason to change. A class that handles SQL, HTML formatting, and business rules has three reasons to change." },
+      { title: "Open/Closed", desc: "When requirements change, extend — don't modify. New behavior through new classes implementing existing interfaces." },
+      { title: "DIP", desc: "Depend on abstractions (interfaces) not concretions (implementations). Makes testing and change easier." },
+      { title: "Maximize cohesion", desc: "When you notice methods and instance variables separating into clusters, you've found hidden classes waiting to be extracted." }
+    ]
+  },
+  {
+    num: 11, title: "Systems",
+    summary: "Zooming out from classes to the system level. Clean code at the low level is not enough if the system-level architecture is poorly structured. Martin discusses separating construction from use, Dependency Injection, and the role of aspects for cross-cutting concerns.",
+    points: [
+      "Separate construction (startup) from use (runtime). The main method is the only place that knows how objects are created and wired. Everything else just uses them.",
+      "Lazy initialization (if service == null) creates hard-coded dependencies and makes testing harder. It mixes construction with use.",
+      "Dependency Injection (DI): the main module constructs all objects and wires them together. Objects declare their dependencies; a DI container provides them.",
+      "Use Factories when construction decisions need to happen at runtime, but keep the factory behind an interface.",
+      "Aspect-Oriented Programming (AOP) handles cross-cutting concerns (logging, security, transactions) without cluttering the core business logic.",
+      "Scale up incrementally. You can't design a big system up front. Start simple, build tests, let the architecture evolve driven by decisions.",
+      "Domain-Specific Languages (DSLs) allow stakeholders to express intent in their own terms, which can be executed or validated.",
+      "Don't over-engineer with heavyweight frameworks. Use the simplest solution that works, and let complexity grow with demonstrated need."
+    ],
+    rules: [
+      { title: "Separate construction from use", desc: "main() wires the system. The rest of the code assumes the world is already set up correctly." },
+      { title: "Use dependency injection", desc: "Objects don't look up dependencies; they declare them. The container provides them. This enables testability." },
+      { title: "Evolve the architecture", desc: "Big Design Up Front is a fallacy. Keep the architecture clean through continuous refactoring and testing." }
+    ]
+  },
+  {
+    num: 12, title: "Emergence",
+    summary: "Kent Beck's four rules of Simple Design that guide a system toward clean emergent design. These rules, applied consistently, lead to good architectures without requiring an omniscient upfront design.",
+    points: [
+      "Kent Beck's Rules of Simple Design (in order of priority):",
+      "Rule 1 — Runs all the tests: a design that cannot be verified is worthless. Testability drives better, more decoupled design.",
+      "Rule 2 — Contains no duplication: duplication represents additional work, risk, and complexity. Eliminate it with refactoring.",
+      "Rule 3 — Expresses the intent of the programmer: choose good names, keep functions and classes small, use standard patterns by name (Composite, Command).",
+      "Rule 4 — Minimizes the number of classes and methods: don't over-engineer. Pragmatic minimum.",
+      "Testing forces decoupling (DIP, interfaces, injection). A comprehensive test suite enables fearless refactoring.",
+      "The TEMPLATE METHOD pattern is a common technique for eliminating higher-level duplication.",
+      "Expressiveness is the biggest source of ongoing cost. Code is read far more often than it is written."
+    ],
+    rules: [
+      { title: "Beck's 4 rules", desc: "Run all tests → No duplication → Expressive → Minimal classes. In that order of priority." },
+      { title: "Tests enable emergence", desc: "With comprehensive tests, you can safely refactor toward better designs. Without them, you're afraid to touch anything." }
+    ]
+  },
+  {
+    num: 13, title: "Concurrency",
+    summary: "Writing clean concurrent code is hard. Concurrency decouples what gets done from when it gets done, enabling throughput improvements — but it introduces subtle bugs that only manifest under stress. Martin provides a concurrency defense posture, common patterns, and testing approaches.",
+    points: [
+      "Concurrency is a decoupling strategy: decouple what from when. Single-threaded code: what and when are tightly coupled.",
+      "Concurrency myths to dispel: (1) it always improves performance — only if wait time can be shared; (2) design doesn't change with concurrency — it changes dramatically; (3) container handles it — you still need to understand concurrent issues.",
+      "Concurrency defense principles: Single Responsibility for concurrency management (keep it separate from the rest); limit scope of shared data; use copies of data instead of sharing; threads should be as independent as possible.",
+      "Know the execution models: Producer-Consumer, Readers-Writers, Dining Philosophers. Most concurrency problems are variants of these.",
+      "Beware of dependencies between synchronized methods. If you must use more than one synchronized method on a shared object, you need Client-Based, Server-Based, or Adapted Server locking.",
+      "Keep synchronized sections small. Locks are expensive. Minimize the critical sections.",
+      "Writing correct concurrent code is hard. Testing concurrent code is harder — failures are not reproducible. Treat spurious test failures as potential threading bugs.",
+      "Use Java's built-in concurrency utilities (java.util.concurrent, AtomicInteger, ConcurrentHashMap) instead of rolling your own."
+    ],
+    rules: [
+      { title: "Limit shared data", desc: "The more objects that share data, the more synchronization you need. Reduce sharing as much as possible." },
+      { title: "Threads should be independent", desc: "Each thread should be self-contained. Take data from an unshared source, process it, and write to a separate destination." },
+      { title: "Know your models", desc: "Producer-Consumer, Readers-Writers, Dining Philosophers. When you see a concurrency problem, ask: which of these is it?" }
+    ]
+  },
+  {
+    num: 14, title: "Successive Refinement",
+    summary: "A full, worked example of how clean code is produced through successive refinement. Martin builds a command-line argument parser called Args, starting with a working but messy version and incrementally refactoring it. This chapter is critical — it shows the actual process, not just the principles.",
+    points: [
+      "The key lesson: clean code is not written clean from the start. You write dirty code first, then you clean it up.",
+      "Martin built Args incrementally — first with booleans, then with strings, then with integers. Each new type caused the code to deteriorate.",
+      "Rather than continuing to add to the deteriorating code, he stopped and refactored. Knowing when to stop and clean is as important as knowing how.",
+      "The refactored version uses the Strategy pattern with ArgumentMarshaler — each argument type is an independent marshaler class.",
+      "The working-but-bad version is shown in full, including all the nested switch statements and parallel arrays — so you can see exactly what the refactoring improved.",
+      "Bad code is easy to add to but increasingly painful. Each new feature in a messy codebase is harder than the last. A clean codebase stays consistently easy to change.",
+      "This chapter is a 60-page worked example — the before and after code are shown in full, demonstrating that principles are not theoretical."
+    ],
+    rules: [
+      { title: "First make it work, then make it clean", desc: "Getting it working is not the end of the job. It's the beginning of the cleanup." },
+      { title: "Stop at deterioration", desc: "When you notice the code getting worse with each new feature, stop adding and refactor before continuing." },
+      { title: "The real cost of a mess", desc: "A messy codebase does not stay stable — it gets worse. Each new feature takes longer than the last." }
+    ]
+  },
+  {
+    num: 15, title: "JUnit Internals",
+    summary: "A case study examining the ComparisonCompactor module from JUnit. Martin takes the original code (already good), critiques it, and improves it. The chapter demonstrates that even well-written code can be cleaner, and shows how professional refactoring works in practice.",
+    points: [
+      "The subject is ComparisonCompactor: given two strings that differ (ABCDE vs ABXDE), it produces a compact difference string (<...B[X]D...>).",
+      "Martin's critique: the original uses encodings in names (fExpected, fActual — the 'f' prefix for fields is unnecessary in modern Java).",
+      "Conditional logic at the start that returns one of the inputs unchanged was simplified by extracting a shouldNotCompact() function.",
+      "Negative conditionals are harder to read than positive ones. if (!canBeCompacted()) → if (shouldBeCompacted()).",
+      "The final refactored version is cleaner, more expressive, and reveals the algorithm's structure more clearly.",
+      "The test suite drove the refactoring: every change was validated against a comprehensive set of tests."
+    ],
+    rules: [
+      { title: "Even good code can be better", desc: "The original ComparisonCompactor was good code. The refactored version is cleaner. Never stop improving." },
+      { title: "Positive conditionals", desc: "if (shouldCompact()) is easier to read than if (!canBeSkipped()). Prefer positive logic." }
+    ]
+  },
+  {
+    num: 16, title: "Refactoring SerialDate",
+    summary: "A deeper case study: Martin takes David Gilbert's SerialDate class (a real open-source Java date library), critiques it, substantially expands the test coverage from ~50% to ~92%, then refactors it. A detailed demonstration of professional code review and cleanup.",
+    points: [
+      "SerialDate had ~50% test coverage (91/185 statements). Martin expanded it to ~92% before refactoring.",
+      "Unused methods were found and deleted. Dead code clutters and confuses.",
+      "The class used a mix of days-since-epoch and ordinal day numbers. Martin separated and named these clearly.",
+      "Abstract class design was improved: SerialDate was made properly abstract with clear contract for subclasses.",
+      "The refactoring process: first, make the tests pass; then, make the code clean. Both steps are necessary.",
+      "Code review should be a normal professional practice — like doctors reviewing cases or pilots doing post-flight analysis.",
+      "The chapter emphasizes courage: you must be willing to look at code critically and change it, even when it means rewriting it substantially."
+    ],
+    rules: [
+      { title: "Expand tests before refactoring", desc: "Get to high coverage before changing structure. Tests give you permission to change." },
+      { title: "Delete dead code", desc: "Unused methods and unreachable branches are noise. Delete them. Source control remembers." },
+      { title: "Code review is professional practice", desc: "Accept and give professional critique. It is how we learn and improve." }
+    ]
+  },
+  {
+    num: 17, title: "Smells and Heuristics",
+    summary: "A comprehensive reference catalog of 66 code smells and heuristics compiled by Martin while refactoring. This is the single most actionable chapter — a checklist of things to look for and fix. Categories cover comments, environment, functions, general design, Java-specific, names, and tests.",
+    points: [
+      "Comments (C1-C5): Inappropriate information, obsolete, redundant, poorly written, commented-out code.",
+      "Environment (E1-E4): Multi-step builds, multi-step tests, need to configure IDE to run.",
+      "Functions (F1-F4): Too many arguments, output arguments, flag arguments, dead functions.",
+      "General (G1-G34, the main list): Multiple languages in one file, obvious behavior not implemented, incorrect behavior at boundaries, overridden safeties, duplication, code at wrong level of abstraction, base classes depending on derivatives, too much information, dead code, vertical separation, inconsistency, clutter, artificial coupling, feature envy, selector arguments, obscured intent, misplaced responsibility, inappropriate static, use explanatory variables, function names say what they do, understand the algorithm, make logical dependencies physical, prefer polymorphism to if/else or switch/case, follow standard conventions, replace magic numbers with constants, be precise, encapsulate conditionals, avoid negative conditionals, functions should do one thing, hidden temporal couplings, don't be arbitrary, encapsulate boundary conditions, functions should descend one level of abstraction, keep configurable data at high levels, avoid transitive navigation (Law of Demeter).",
+      "Names (N1-N7): Choose descriptive names, names at appropriate level, use standard nomenclature, unambiguous names, long names for long scopes, avoid encodings, names should describe side effects.",
+      "Tests (T1-T9): Insufficient tests, use a coverage tool, don't skip trivial tests, test near bugs, patterns of failure reveal bugs, coverage patterns are revealing, tests should be fast."
+    ],
+    rules: [
+      { title: "G4 — Overridden safeties", desc: "Don't turn off failing tests or compiler warnings to make a build pass. These are your safety net." },
+      { title: "G5 — Duplication (DRY)", desc: "Every time you see duplication, it's a missed opportunity for abstraction. Subclasses, strategy, template method." },
+      { title: "G11 — Inconsistency", desc: "If you process errors in a variable called 'error', call it 'error' everywhere. Consistency enables navigation." },
+      { title: "G23 — Prefer polymorphism", desc: "switch/if-else chains are a smell. Polymorphism replaces conditionals with objects." },
+      { title: "G28 — Encapsulate conditionals", desc: "if (shouldBeDeleted(timer)) instead of if (timer.hasExpired() && !timer.isRecurrent()). Name the intent." },
+      { title: "G36 — Avoid transitive navigation", desc: "a.b.c.doSomething() — each '.' is a new coupling. Follow the Law of Demeter." }
+    ]
+  }
+];
+
+let current = 0;
+
+function renderNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = chapters.map((ch, i) =>
+    `<button class="${i === current ? 'active' : ''}" onclick="show(${i})">Ch ${ch.num}</button>`
+  ).join('');
+}
+
+function renderChapters() {
+  const container = document.getElementById('chapters');
+  container.innerHTML = chapters.map((ch, i) => `
+    <div class="chapter ${i === current ? 'active' : ''}" id="ch${i}">
+      <div class="ch-header">
+        <span class="ch-num">Chapter ${ch.num}</span>
+        <span class="ch-title">${ch.title}</span>
+      </div>
+      <div class="summary-box">${ch.summary}</div>
+      <div class="section-label">Key points</div>
+      <ul class="points">
+        ${ch.points.map(p => `<li>${p}</li>`).join('')}
+      </ul>
+      <div class="section-label">Rules & principles</div>
+      <div class="rules">
+        ${ch.rules.map(r => `<div class="rule-card"><strong>${r.title}</strong><span>${r.desc}</span></div>`).join('')}
+      </div>
+      <div class="nav-footer">
+        <button onclick="show(${i-1})" ${i===0?'style="visibility:hidden"':''}>← Previous</button>
+        <button onclick="show(${i+1})" ${i===chapters.length-1?'style="visibility:hidden"':''}>Next →</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function show(i) {
+  if (i < 0 || i >= chapters.length) return;
+  current = i;
+  document.querySelectorAll('.chapter').forEach((el, idx) => {
+    el.classList.toggle('active', idx === i);
+  });
+  document.querySelectorAll('.nav button').forEach((el, idx) => {
+    el.classList.toggle('active', idx === i);
+  });
+  window.scrollTo(0, 0);
+}
+
+renderNav();
+renderChapters();
+</script>
